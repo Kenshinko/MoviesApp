@@ -1,1 +1,1 @@
-# This is sample project on React with completed settings
+# Movies App on React

@@ -1,43 +1,67 @@
 import { Component } from 'react';
-import { Card, Image, Typography, Tag, Space, Rate } from 'antd';
+import { Card, Image, Typography, Tag, Space, Rate, Spin } from 'antd';
 const { Title, Paragraph } = Typography;
 
 import './MovieItem.scss';
 
-import { URLfilmCover, NoCoverPlaceholder } from '../../services/moviesapi';
+import { noCoverPlaceholder, URLfilmCover } from '../../services/moviesapi';
 
 export default class MovieItem extends Component {
   render() {
-    const { title, coverPath, avgRating, release, overview } = this.props;
+    const { shortTitle, fullTitle, coverPath, avgRating, release, overview } =
+      this.props;
+
+    const preloadCoverPlaceholder = (
+      <Space
+        style={{
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgb(190, 190, 190, 0.90)',
+        }}
+      >
+        <Spin
+          size="large"
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
+      </Space>
+    );
 
     return (
       <Card
         className="moviecard"
         bodyStyle={{ display: 'flex', padding: 0 }}
         hoverable
+        loading={false}
       >
         <Image
           height={280}
           width={180}
-          style={{ objectFit: 'cover' }}
+          style={{
+            position: 'relative',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            objectFit: 'cover',
+          }}
           src={`${URLfilmCover}${coverPath}`}
-          fallback={NoCoverPlaceholder}
+          fallback={noCoverPlaceholder}
+          placeholder={preloadCoverPlaceholder}
         />
-
         <Space
-          style={{ padding: '10px 20px', flex: 1, rowGap: 0 }}
+          style={{
+            padding: '10px 20px',
+            flex: 1,
+            rowGap: 0,
+          }}
           direction="vertical"
         >
-          <Title
-            style={{
-              fontFamily: 'Inter UI',
-              whiteSpace: 'no-wrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-            level={4}
-          >
-            {title}
+          <Title style={{ fontFamily: 'Inter UI' }} level={4} title={fullTitle}>
+            {shortTitle}
           </Title>
           <Space
             style={{

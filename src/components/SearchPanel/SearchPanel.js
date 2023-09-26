@@ -27,6 +27,7 @@ export default class SearchPanel extends Component {
       <Form
         onChange={(event) => handleSearchQuery(event.target.value)}
         autoComplete="off"
+        style={{ width: '100%' }}
       >
         <Input
           type="text"
