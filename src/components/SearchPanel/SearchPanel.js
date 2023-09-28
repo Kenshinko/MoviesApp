@@ -1,6 +1,8 @@
 import { Component } from 'react';
 import { Form, Input } from 'antd';
 
+import { debounce } from '../../services/moviesapi.js';
+
 import './SearchPanel.scss';
 
 export default class SearchPanel extends Component {
@@ -12,22 +14,20 @@ export default class SearchPanel extends Component {
     });
   };
 
-  handleSubmit = (event) => {
-    if (event.key === 'Enter' && this.state.inputValue.trim()) {
-      this.setState({
-        inputValue: this.props.inputValue,
-      });
-    }
-  };
+  handleSubmit = debounce(() => {
+    this.setState({
+      inputValue: this.props.inputValue,
+    });
+  }, 500);
 
   render() {
-    const { handleSearchQuery } = this.props;
+    const { setSearchQuery } = this.props;
 
     return (
       <Form
-        onChange={(event) => handleSearchQuery(event.target.value)}
+        onChange={(event) => setSearchQuery(event.target.value)}
         autoComplete="off"
-        style={{ width: '100%' }}
+        style={{ width: '100%', minWidth: '388px' }}
       >
         <Input
           type="text"
@@ -36,7 +36,7 @@ export default class SearchPanel extends Component {
           required
           value={this.state.inputValue}
           onChange={this.handleQuery}
-          onKeyDown={this.handleSubmit}
+          onKeyUp={this.handleSubmit}
         />
       </Form>
     );

@@ -36,13 +36,13 @@ export default class MovieItem extends Component {
         className="moviecard"
         bodyStyle={{ display: 'flex', padding: 0 }}
         hoverable
-        loading={false}
       >
         <Image
-          height={280}
-          width={180}
+          className="moviecard__img"
           style={{
             position: 'relative',
+            height: '280px',
+            width: '180px',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -53,6 +53,7 @@ export default class MovieItem extends Component {
           placeholder={preloadCoverPlaceholder}
         />
         <Space
+          className="moviecard__desc"
           style={{
             padding: '10px 20px',
             flex: 1,
@@ -83,17 +84,55 @@ export default class MovieItem extends Component {
             {avgRating}
           </Space>
           <Paragraph
+            className="moviecard__release"
             style={{ fontFamily: 'Inter UI', fontSize: '12px', color: '#827e7e' }}
           >
             {release}
           </Paragraph>
           <Space>
-            <Tag className="moviecard__label">Tag 1</Tag>
-            <Tag className="moviecard__label">Tag 2</Tag>
-            <Tag className="moviecard__label">Tag 3</Tag>
-            <Tag className="moviecard__label">Tag 4</Tag>
+            <Tag
+              style={{
+                fontFamily: 'Inter UI',
+                marginInlineEnd: 0,
+                borderRadius: '2px',
+                color: 'rgba(0, 0, 0, 0.65)',
+              }}
+            >
+              Tag 1
+            </Tag>
+            <Tag
+              style={{
+                fontFamily: 'Inter UI',
+                marginInlineEnd: 0,
+                borderRadius: '2px',
+                color: 'rgba(0, 0, 0, 0.65)',
+              }}
+            >
+              Tag 2
+            </Tag>
+            <Tag
+              style={{
+                fontFamily: 'Inter UI',
+                marginInlineEnd: 0,
+                borderRadius: '2px',
+                color: 'rgba(0, 0, 0, 0.65)',
+              }}
+            >
+              Tag 3
+            </Tag>
+            <Tag
+              style={{
+                fontFamily: 'Inter UI',
+                marginInlineEnd: 0,
+                borderRadius: '2px',
+                color: 'rgba(0, 0, 0, 0.65)',
+              }}
+            >
+              Tag 4
+            </Tag>
           </Space>
           <Paragraph
+            className="moviecard__overview"
             style={{
               marginTop: '10px',
               fontFamily: 'Inter UI',

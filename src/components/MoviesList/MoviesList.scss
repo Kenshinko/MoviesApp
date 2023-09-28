@@ -1,0 +1,9 @@
+.movielist {
+  padding-top: 35px;
+  gap: 35px;
+
+  @media (max-width: 420px) {
+    padding-top: 10px;
+    gap: 20px;
+  }
+}

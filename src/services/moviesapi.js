@@ -14,13 +14,16 @@ const options = {
   },
 };
 
-export async function getMoviesList(query) {
+export async function getMoviesList(query, page) {
   try {
     const response = await fetch(
-      `${URLAPI}?query=${query}&include_adult=false&language=en-US&page=1`,
+      `${URLAPI}?query=${query}&include_adult=false&language=en-US&page=${page}`,
       options
     );
 
+    console.log(
+      `${URLAPI}?query=${query}&include_adult=false&language=en-US&page=${page}`
+    );
     return response.json();
   } catch (err) {
     return err.message;

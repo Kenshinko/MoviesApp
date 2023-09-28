@@ -10,6 +10,26 @@ import './App.scss';
 import Navigation from '../Navigation';
 
 export default class App extends Component {
+  state = {
+    totalResults: 0,
+    totalPages: 0,
+    moviesPerPage: 20,
+    currentPage: 1,
+  };
+
+  handleNavigation = (results, pages) => {
+    this.setState({
+      totalResults: results,
+      totalPages: pages,
+    });
+  };
+
+  setCurrentPage = (pageNumber) => {
+    this.setState({
+      currentPage: pageNumber,
+    });
+  };
+
   render() {
     const connectionIssues = (
       <Fragment>
@@ -53,27 +73,31 @@ export default class App extends Component {
           height: '100vh',
           margin: '0 auto',
           maxWidth: '1145px',
+          minWidth: '420px',
           backgroundColor: '#fff',
         }}
       >
         <Online>
           <Header style={{ height: 'auto', backgroundColor: '#fff' }}>
-            <Navigation />
+            <Navigation
+              handleNavigation={this.handleNavigation}
+              currentPage={this.state.currentPage}
+            />
           </Header>
           <Footer
+            className="footer"
             style={{
-              padding: '35px 50px',
               textAlign: 'center',
               backgroundColor: '#fff',
             }}
           >
             <Pagination
-              onChange={() => {
-                console.log('Click');
-              }}
+              onChange={(event) => this.setCurrentPage(event)}
               defaultCurrent={1}
-              pageSize={6}
-              total={20}
+              currentPage={this.state.currentPage}
+              pageSize={this.state.moviesPerPage}
+              total={this.state.totalResults}
+              showSizeChanger={false}
             />
           </Footer>
         </Online>
