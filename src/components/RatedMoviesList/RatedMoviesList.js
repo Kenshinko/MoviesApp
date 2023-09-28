@@ -21,6 +21,7 @@ export default class RatedMoviesList extends Component {
           alignItems: 'center',
         }}
       >
+        <div style={{ height: '32px' }}></div>
         {this.state.movies.length > 0 ? (
           <Space
             style={{
@@ -38,7 +39,6 @@ export default class RatedMoviesList extends Component {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
-              marginTop: '32px',
             }}
           />
         )}

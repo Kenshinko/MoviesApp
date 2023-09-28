@@ -8,11 +8,18 @@ import RatedMoviesList from '../RatedMoviesList';
 
 export default class Navigation extends Component {
   render() {
+    const { handleNavigation, currentPage } = this.props;
+
     const items = [
       {
         key: '1',
         label: 'Search',
-        children: <MoviesList />,
+        children: (
+          <MoviesList
+            handleNavigation={handleNavigation}
+            currentPage={currentPage}
+          />
+        ),
       },
       {
         key: '2',

@@ -1,55 +1,27 @@
 import { Component, Fragment } from 'react';
 import { format } from 'date-fns';
-import { nanoid } from 'nanoid';
-import { Layout, Space, Empty, Alert } from 'antd';
+import { Layout, Space, Empty, Spin } from 'antd';
 const { Content } = Layout;
 
 import './MoviesList.scss';
 import SearchPanel from '../SearchPanel';
 import MovieItem from '../MovieItem';
+import MoviesListBackground from '../MoviesListBackground';
 import { debounce, getMoviesList } from '../../services/moviesapi.js';
 
 export default class MoviesList extends Component {
   state = {
     movies: [],
     hasSearched: false,
+    hasLoading: false,
     hasFound: false,
     hasError: false,
     errorMessage: '',
     totalResults: 0,
     totalPages: 0,
+    searchQuery: '',
+    activePage: this.props.currentPage,
   };
-
-  handleSearchQuery = debounce((query) => {
-    getMoviesList(query).then((data) => {
-      // Если данные не получены от сервера, выходим с отметкой об ошибке.
-      if (typeof data !== 'object') {
-        this.setState({
-          hasError: true,
-          errorMessage: data,
-        });
-        return;
-      }
-      // Распихиваем полученные данные по стейту.
-      this.setState({
-        hasSearched: true,
-        movies: [...data.results],
-        totalResults: data.total_results,
-        totalPages: data.total_pages,
-      });
-      // Если текущий поиск не дал результатов, выходим с отметкой о безуспешном поиске.
-      if (data.total_results === 0) {
-        this.setState({
-          hasFound: false,
-        });
-        return;
-      }
-      // Поиск успешен, завершаем выполнение и делаем отметку в стейте.
-      this.setState({
-        hasFound: true,
-      });
-    });
-  }, 650);
 
   setReleaseDate = (releaseDate) => {
     if (!releaseDate) {
@@ -69,11 +41,63 @@ export default class MoviesList extends Component {
     return croppedText.join(' ');
   };
 
+  setSearchQuery = (query) => {
+    this.setState({
+      searchQuery: query,
+    });
+
+    this.handleSearching();
+  };
+
+  handleSearchQuery = debounce(() => {
+    getMoviesList(this.state.searchQuery, this.state.activePage)
+      .then((data) => {
+        // Если данные не получены от сервера, выходим с отметкой об ошибке.
+        if (typeof data !== 'object') {
+          this.setState({
+            hasError: true,
+            errorMessage: data,
+          });
+          return;
+        }
+        // Распихиваем полученные данные по стейту.
+        this.setState({
+          hasSearched: true,
+          movies: [...data.results],
+          totalResults: data.total_results,
+          totalPages: data.total_pages,
+        });
+        // Если текущий поиск не дал результатов, выходим с отметкой о безуспешном поиске.
+        if (data.total_results === 0) {
+          this.setState({
+            hasFound: false,
+          });
+          return;
+        }
+        // Поиск успешен, завершаем выполнение и делаем отметку в стейте.
+        this.setState({
+          hasFound: true,
+        });
+      })
+      .finally(this.handleLoading(false));
+  }, 350);
+
+  handleSearching = debounce(() => {
+    this.handleLoading(true);
+    this.handleSearchQuery();
+  }, 650);
+
+  handleLoading = (boolean) => {
+    this.setState({
+      hasLoading: boolean,
+    });
+  };
+
   renderMoviesList = (movies) => {
     return movies.map((movie) => {
       return (
         <MovieItem
-          key={nanoid()}
+          key={movie.id}
           shortTitle={this.setTruncateText(movie.title, 3)}
           fullTitle={movie.title}
           coverPath={movie.poster_path}
@@ -85,50 +109,32 @@ export default class MoviesList extends Component {
     });
   };
 
-  render() {
-    // Исходное состояние компонента, поиск не был произведен.
-    const initialMoviesList = (
-      <Fragment>
-        <Empty
-          style={{
-            height: '500px',
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-          }}
-        />
-        {/* Ничего не найдено, список фильмов пуст. */}
-        {this.state.hasSearched && !this.state.hasFound ? (
-          <Alert
-            message="Not found"
-            description="No movies were found matching your request."
-            type="info"
-            showIcon
-            style={{ width: '375px', position: 'absolute', top: '15%' }}
-          />
-        ) : null}
-        {/* Сервер не ответил или данные пришли с ошибкой. */}
-        {this.state.hasError ? (
-          <Alert
-            message="Server not responce"
-            description={`No response was received from the server. Error message: ${this.state.errorMessage}`}
-            type="error"
-            showIcon
-            style={{ width: '375px', position: 'absolute', top: '15%' }}
-          />
-        ) : null}
-      </Fragment>
-    );
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      this.state.totalResults !== prevState.totalResults ||
+      this.state.totalPages !== prevState.totalPages
+    ) {
+      this.props.handleNavigation(this.state.totalResults, this.state.totalPages);
+    }
 
+    if (this.props.currentPage !== prevState.activePage) {
+      this.setState({
+        activePage: this.props.currentPage,
+      });
+
+      this.handleSearching();
+    }
+  }
+
+  render() {
+    console.log(this.state.totalPages, this.state.activePage);
     // Рендерим список найденого.
     const foundMoviesList = (
       <Space
+        className="movielist"
         style={{
-          paddingTop: '35px',
           justifyContent: 'center',
           flexWrap: 'wrap',
-          gap: '35px',
         }}
       >
         {this.renderMoviesList(this.state.movies)}
@@ -146,8 +152,38 @@ export default class MoviesList extends Component {
           alignItems: 'center',
         }}
       >
-        <SearchPanel inputValue="" handleSearchQuery={this.handleSearchQuery} />
-        {this.state.hasFound ? foundMoviesList : initialMoviesList}
+        <SearchPanel inputValue="" setSearchQuery={this.setSearchQuery} />
+        {this.state.hasLoading ? (
+          <Fragment>
+            <Empty
+              style={{
+                height: '500px',
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+              }}
+            />
+            <Spin
+              size="large"
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%) scale(2)',
+              }}
+            />
+          </Fragment>
+        ) : this.state.hasFound ? (
+          foundMoviesList
+        ) : (
+          <MoviesListBackground
+            hasSearched={this.state.hasSearched}
+            hasFound={this.state.hasFound}
+            hasError={this.state.hasError}
+            errorMessage={this.state.errorMessage}
+          />
+        )}
       </Content>
     );
   }
