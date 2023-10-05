@@ -1,21 +1,50 @@
-import { Component, Fragment } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Layout, Pagination, Alert } from 'antd';
 import { Offline, Online } from 'react-detect-offline';
-
 const { Header, Footer } = Layout;
 
 import '../../rest.scss';
 import './App.scss';
-
 import Navigation from '../Navigation';
+import { getGuestSession, getGenres } from '../../services/moviesapi.js';
+import { ContextProvider } from '../../services/context.js';
 
 export default class App extends Component {
   state = {
-    totalResults: 0,
+    totalResults: 1,
     totalPages: 0,
     moviesPerPage: 20,
     currentPage: 1,
+    sessionID: null,
+    movieGenres: [],
   };
+
+  session = JSON.parse(localStorage.getItem('session'));
+
+  componentDidMount() {
+    if (new Date(this.session?.expires_at).getTime() <= new Date().getTime()) {
+      localStorage.removeItem('session');
+    }
+
+    this.setState({
+      sessionID: this.session?.guest_session_id,
+    });
+
+    getGenres().then((res) => {
+      if (res === 'Failed to fetch') return;
+      this.setState({
+        movieGenres: [...res.genres],
+      });
+    });
+  }
+
+  componentDidUpdate() {
+    if (!this.session || this.session === 'Failed to fetch') {
+      getGuestSession().then((response) => {
+        localStorage.setItem('session', JSON.stringify(response));
+      });
+    }
+  }
 
   handleNavigation = (results, pages) => {
     this.setState({
@@ -78,28 +107,31 @@ export default class App extends Component {
         }}
       >
         <Online>
-          <Header style={{ height: 'auto', backgroundColor: '#fff' }}>
-            <Navigation
-              handleNavigation={this.handleNavigation}
-              currentPage={this.state.currentPage}
-            />
-          </Header>
-          <Footer
-            className="footer"
-            style={{
-              textAlign: 'center',
-              backgroundColor: '#fff',
-            }}
-          >
-            <Pagination
-              onChange={(event) => this.setCurrentPage(event)}
-              defaultCurrent={1}
-              currentPage={this.state.currentPage}
-              pageSize={this.state.moviesPerPage}
-              total={this.state.totalResults}
-              showSizeChanger={false}
-            />
-          </Footer>
+          <ContextProvider value={this.state}>
+            <Header style={{ height: 'auto', backgroundColor: '#fff' }}>
+              <Navigation
+                handleNavigation={this.handleNavigation}
+                currentPage={this.state.currentPage}
+                sessionID={this.state.sessionID}
+              />
+            </Header>
+            <Footer
+              className="footer"
+              style={{
+                textAlign: 'center',
+                backgroundColor: '#fff',
+              }}
+            >
+              <Pagination
+                onChange={(event) => this.setCurrentPage(event)}
+                currentPage={this.state.currentPage}
+                pageSize={this.state.moviesPerPage}
+                total={this.state.totalResults}
+                showSizeChanger={false}
+                hideOnSinglePage
+              />
+            </Footer>
+          </ContextProvider>
         </Online>
 
         <Offline>

@@ -1,6 +1,5 @@
-const KeyAPI =
-  'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMmU5Y2ZiYWQxOTJkY2VlNTdiZTliZTAzOGQzOWYyMyIsInN1YiI6IjY1MGFlM2U1ODFjN2JlMDExZDc2ZWYxNSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.f2Qn8ba7o7eDRqHKdGPMzSHotUkWWOcvGocMjYnkP0s';
-const URLAPI = 'https://api.themoviedb.org/3/search/movie';
+const KeyAPIAuth = '02e9cfbad192dcee57be9be038d39f23';
+const URLAPI = 'https://api.themoviedb.org/3';
 
 export const URLfilmCover = 'https://image.tmdb.org/t/p/w500/';
 export const noCoverPlaceholder =
@@ -10,19 +9,73 @@ const options = {
   method: 'GET',
   headers: {
     accept: 'application/json',
-    Authorization: `Bearer ${KeyAPI}`,
   },
 };
 
-export async function getMoviesList(query, page) {
+export async function getMoviesList(query, page = 1) {
   try {
     const response = await fetch(
-      `${URLAPI}?query=${query}&include_adult=false&language=en-US&page=${page}`,
+      `${URLAPI}/search/movie?api_key=${KeyAPIAuth}&query=${query}&include_adult=false&language=en-US&page=${page}`,
       options
     );
 
-    console.log(
-      `${URLAPI}?query=${query}&include_adult=false&language=en-US&page=${page}`
+    return response.json();
+  } catch (err) {
+    return err.message;
+  }
+}
+
+export async function getRatedMoviesList(sessionID, page = 1) {
+  try {
+    const response = await fetch(
+      `${URLAPI}/guest_session/${sessionID}/rated/movies?api_key=${KeyAPIAuth}&language=en-US&page=${page}&sort_by=created_at.asc`,
+      options
+    );
+
+    return response.json();
+  } catch (err) {
+    return err.message;
+  }
+}
+
+export async function getGuestSession() {
+  try {
+    const response = await fetch(
+      `${URLAPI}/authentication/guest_session/new?api_key=${KeyAPIAuth}`,
+      options
+    );
+
+    return response.json();
+  } catch (err) {
+    return err.message;
+  }
+}
+
+export async function getGenres() {
+  try {
+    const response = await fetch(
+      `${URLAPI}/genre/movie/list?api_key=${KeyAPIAuth}&language=en`,
+      options
+    );
+
+    return response.json();
+  } catch (err) {
+    return err.message;
+  }
+}
+
+export async function AddMovieToRatedList(movieID, sessionID, ownRating) {
+  try {
+    const response = await fetch(
+      `${URLAPI}/movie/${movieID}/rating?api_key=${KeyAPIAuth}&guest_session_id=${sessionID}`,
+      {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
+        },
+        body: `{"value":${ownRating}}`,
+      }
     );
     return response.json();
   } catch (err) {
