@@ -1,11 +1,9 @@
 import { Component, Fragment } from 'react';
-import { format } from 'date-fns';
 import { Layout, Space, Empty, Spin } from 'antd';
 const { Content } = Layout;
 
 import './MoviesList.scss';
 import SearchPanel from '../SearchPanel';
-import MovieItem from '../MovieItem';
 import MoviesListBackground from '../MoviesListBackground';
 import { debounce, getMoviesList } from '../../services/moviesapi.js';
 
@@ -21,24 +19,6 @@ export default class MoviesList extends Component {
     totalPages: 0,
     searchQuery: '',
     activePage: this.props.currentPage,
-  };
-
-  setReleaseDate = (releaseDate) => {
-    if (!releaseDate) {
-      return 'Unknown release date';
-    }
-    return format(new Date(releaseDate), 'MMMM dd, yyyy');
-  };
-
-  setTruncateText = (text, words) => {
-    const fullText = text.split(' ');
-    const croppedText = fullText.filter((word, idx) => idx < words);
-
-    if (fullText.length > words) {
-      return `${croppedText.join(' ')} ...`;
-    }
-
-    return croppedText.join(' ');
   };
 
   setSearchQuery = (query) => {
@@ -93,22 +73,6 @@ export default class MoviesList extends Component {
     });
   };
 
-  renderMoviesList = (movies) => {
-    return movies.map((movie) => {
-      return (
-        <MovieItem
-          key={movie.id}
-          shortTitle={this.setTruncateText(movie.title, 3)}
-          fullTitle={movie.title}
-          coverPath={movie.poster_path}
-          avgRating={movie.vote_average.toFixed(1)}
-          release={this.setReleaseDate(movie.release_date)}
-          overview={this.setTruncateText(movie.overview, 38)}
-        />
-      );
-    });
-  };
-
   componentDidUpdate(prevProps, prevState) {
     if (
       this.state.totalResults !== prevState.totalResults ||
@@ -127,7 +91,6 @@ export default class MoviesList extends Component {
   }
 
   render() {
-    console.log(this.state.totalPages, this.state.activePage);
     // Рендерим список найденого.
     const foundMoviesList = (
       <Space
@@ -137,7 +100,7 @@ export default class MoviesList extends Component {
           flexWrap: 'wrap',
         }}
       >
-        {this.renderMoviesList(this.state.movies)}
+        {this.props.renderMoviesList(this.state.movies)}
       </Space>
     );
 
