@@ -40,7 +40,7 @@ export default class MovieItem extends Component {
             color: 'rgba(0, 0, 0, 0.65)',
           }}
         >
-          {genreTag.name || null}
+          {genreTag ? genreTag.name : null}
         </Tag>
       );
     });
