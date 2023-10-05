@@ -12,6 +12,7 @@ export default class RatedMoviesList extends Component {
 
   componentDidMount() {
     getRatedMoviesList(this.props.sessionID).then((movies) => {
+      if (movies === 'Failed to fetch') return;
       this.setState(() => {
         return {
           ratedMovies: movies.results,

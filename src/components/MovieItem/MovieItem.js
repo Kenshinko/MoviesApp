@@ -12,18 +12,6 @@ import {
 import { ContextConsumer } from '../../services/context.js';
 
 export default class MovieItem extends Component {
-  // state = {
-  //   ownRating: 0,
-  // };
-
-  // componentDidUpdate(prevProps) {
-  //   if (this.props.ownRating !== prevProps.ownRating) {
-  //     this.setState({
-  //       ownRating: this.props.ownRating,
-  //     });
-  //   }
-  // }
-
   setRateColor(rate) {
     if (rate <= 3) return '#E90000';
     if (rate <= 5) return '#E97E00';
